@@ -103,84 +103,97 @@
     </div>
 
     <script>
-        let items = [];
-        const productPrices = {
-            "Crop Top": 250,
-            "Crop Shirt": 250,
-            "Crop T-shirt": 200,
-            "Korean Top": 250,
-            "Turkish Shirt": 300,
-            "Imported Chiffon Top": 250,
-            "Cotton Top": 250,
-            "Cotton Shirt": 250,
-            "Korean Formal Trousers": 250,
-            "Jeans": 400,
-            "Plazo": 200,
-            "One-piece": 500
-        };
+    let items = [];
+    const productPrices = {
+        "Crop Top": 250,
+        "Crop Shirt": 250,
+        "Crop T-shirt": 200,
+        "Korean Top": 250,
+        "Turkish Shirt": 300,
+        "Imported Chiffon Top": 250,
+        "Cotton Top": 250,
+        "Cotton Shirt": 250,
+        "Korean Formal Trousers": 250,
+        "Jeans": 400,
+        "Plazo": 200,
+        "One-piece": 500
+    };
 
-        function populateProductDropdown() {
-            let productSelect = document.getElementById("productSelect");
-            for (let product in productPrices) {
-                let option = document.createElement("option");
-                option.value = product;
-                option.textContent = `${product} - ₹${productPrices[product]}`;
-                productSelect.appendChild(option);
-            }
+    function populateProductDropdown() {
+        let productSelect = document.getElementById("productSelect");
+        for (let product in productPrices) {
+            let option = document.createElement("option");
+            option.value = product;
+            option.textContent = `${product} - ₹${productPrices[product]}`;
+            productSelect.appendChild(option);
+        }
+    }
+
+    function updatePrice() {
+        let itemName = document.getElementById("productSelect").value;
+        document.getElementById("price").value = productPrices[itemName] || "";
+    }
+
+    function addItem() {
+        let itemName = document.getElementById("productSelect").value;
+        let price = productPrices[itemName];
+        let quantity = parseInt(document.getElementById("quantity").value);
+
+        if (!itemName || price <= 0 || quantity <= 0) {
+            alert("Please select a valid item and quantity!");
+            return;
         }
 
-        function updatePrice() {
-            let itemName = document.getElementById("productSelect").value;
-            document.getElementById("price").value = productPrices[itemName];
-        }
+        items.push({ name: itemName, price, quantity });
+        updateItemsTable();
+    }
 
-        function addItem() {
-            let itemName = document.getElementById("productSelect").value;
-            let price = productPrices[itemName];
-            let quantity = parseInt(document.getElementById("quantity").value);
+    function removeItem(index) {
+        items.splice(index, 1); // Remove the selected item from the array
+        updateItemsTable(); // Refresh the table
+    }
 
-            if (!itemName || price <= 0 || quantity <= 0) {
-                alert("Please select a valid item and quantity!");
-                return;
-            }
+    function updateItemsTable() {
+        let table = document.getElementById("itemsTable");
+        table.innerHTML = `<tr><th>Item</th><th>₹</th><th>Qty</th><th>Action</th></tr>`;
+        items.forEach((item, index) => {
+            table.innerHTML += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>₹${item.price}</td>
+                    <td>${item.quantity}</td>
+                    <td><button onclick="removeItem(${index})">❌</button></td>
+                </tr>
+            `;
+        });
+    }
 
-            items.push({ name: itemName, price, quantity });
-            updateItemsTable();
-        }
+    function generateInvoice() {
+        document.getElementById("invoice").style.display = "block";
+        document.getElementById("cName").innerText = document.getElementById("customerName").value;
+        document.getElementById("cMobile").innerText = document.getElementById("customerMobile").value;
+        document.getElementById("invoiceDate").innerText = new Date().toLocaleDateString();
 
-        function updateItemsTable() {
-            let table = document.getElementById("itemsTable");
-            table.innerHTML = `<tr><th>Item</th><th>₹</th><th>Qty</th><th>Action</th></tr>`;
-            items.forEach((item, index) => {
-                table.innerHTML += `<tr><td>${item.name}</td><td>₹${item.price}</td><td>${item.quantity}</td><td><button onclick="removeItem(${index})">Remove</button></td></tr>`;
-            });
-        }
+        let total = 0;
+        let invoiceTable = document.getElementById("invoiceItems");
+        invoiceTable.innerHTML = "";
 
-        function generateInvoice() {
-            document.getElementById("invoice").style.display = "block";
-            document.getElementById("cName").innerText = document.getElementById("customerName").value;
-            document.getElementById("cMobile").innerText = document.getElementById("customerMobile").value;
-            document.getElementById("invoiceDate").innerText = new Date().toLocaleDateString();
+        items.forEach(item => {
+            let row = `<tr><td>${item.name}</td><td>₹${item.price}</td><td>${item.quantity}</td><td>₹${item.price * item.quantity}</td></tr>`;
+            invoiceTable.innerHTML += row;
+            total += item.price * item.quantity;
+        });
 
-            let total = 0;
-            let invoiceTable = document.getElementById("invoiceItems");
-            invoiceTable.innerHTML = "";
+        document.getElementById("grandTotal").innerText = total;
+    }
 
-            items.forEach(item => {
-                let row = `<tr><td>${item.name}</td><td>₹${item.price}</td><td>${item.quantity}</td><td>₹${item.price * item.quantity}</td></tr>`;
-                invoiceTable.innerHTML += row;
-                total += item.price * item.quantity;
-            });
+    function printInvoice() {
+        window.print();
+    }
 
-            document.getElementById("grandTotal").innerText = total;
-        }
+    document.addEventListener("DOMContentLoaded", populateProductDropdown);
+</script>
 
-        function printInvoice() {
-            window.print();
-        }
-
-        document.addEventListener("DOMContentLoaded", populateProductDropdown);
-    </script>
 
 </body>
 </html>

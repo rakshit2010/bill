@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 400px; margin: auto; }
+        .invoice { display: none; border: 1px solid black; padding: 10px; margin-top: 20px; text-align: left; }
+        .print-btn { margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Simple Invoice</h2>
+        <form id="invoiceForm">
+            <label>Customer Name:</label><br>
+            <input type="text" id="customerName" required><br><br>
+            
+            <label>Item Name:</label><br>
+            <input type="text" id="itemName" required><br><br>
+
+            <label>Price:</label><br>
+            <input type="number" id="price" required><br><br>
+
+            <label>Quantity:</label><br>
+            <input type="number" id="quantity" required><br><br>
+
+            <button type="button" onclick="generateInvoice()">Generate Invoice</button>
+        </form>
+
+        <div class="invoice" id="invoice">
+            <h3>Invoice</h3>
+            <p><strong>Customer:</strong> <span id="cName"></span></p>
+            <p><strong>Item:</strong> <span id="iName"></span></p>
+            <p><strong>Price:</strong> ₹<span id="iPrice"></span></p>
+            <p><strong>Quantity:</strong> <span id="iQuantity"></span></p>
+            <p><strong>Total:</strong> ₹<span id="iTotal"></span></p>
+            <button class="print-btn" onclick="window.print()">Print</button>
+        </div>
+    </div>
+
+    <script>
+        function generateInvoice() {
+            let name = document.getElementById("customerName").value;
+            let item = document.getElementById("itemName").value;
+            let price = document.getElementById("price").value;
+            let quantity = document.getElementById("quantity").value;
+            let total = price * quantity;
+
+            document.getElementById("cName").innerText = name;
+            document.getElementById("iName").innerText = item;
+            document.getElementById("iPrice").innerText = price;
+            document.getElementById("iQuantity").innerText = quantity;
+            document.getElementById("iTotal").innerText = total;
+
+            document.getElementById("invoice").style.display = "block";
+        }
+    </script>
+
+</body>
+</html>

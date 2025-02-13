@@ -96,7 +96,7 @@
                 </tfoot>
             </table>
             <p>Thank you for your purchase!</p>
-            <button class="print-btn" onclick="printAndSendWhatsApp()">Print & Send via WhatsApp</button>
+            <button class="print-btn" onclick="printAndSendPDF()">Print & Send via WhatsApp</button>
         </div>
     </div>
 
@@ -183,6 +183,26 @@
             let message = `Invoice for ${document.getElementById("cName").innerText}\nTotal: ₹${document.getElementById("grandTotal").innerText}`;
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`);
         }
+       
+async function printAndSendPDF() {
+    let invoiceHtml = document.getElementById("invoice").innerHTML;
+    let phoneNumber = document.getElementById("customerMobile").value;
+
+    let response = await fetch("/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceHtml, phoneNumber }),
+    });
+
+    let result = await response.json();
+    if (result.success) {
+        alert("Invoice sent via WhatsApp!");
+    } else {
+        alert("Error sending invoice.");
+    }
+}
+
+
 
         document.addEventListener("DOMContentLoaded", populateProductDropdown);
     </script>

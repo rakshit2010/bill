@@ -16,13 +16,13 @@
         .invoice-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .invoice-table th, .invoice-table td { padding: 4px; text-align: left; border-bottom: 1px dashed black; }
         .total-row { font-weight: bold; }
-        .print-btn, .whatsapp-btn { margin-top: 10px; }
+        .print-btn { margin-top: 10px; }
 
         @media print {
             body * { visibility: hidden; }
             .invoice, .invoice * { visibility: visible; }
             .invoice { position: absolute; left: 0; top: 0; width: 100%; height: auto; }
-            .print-btn, .whatsapp-btn { display: none; }
+            .print-btn { display: none; }
         }
     </style>
 </head>
@@ -96,8 +96,7 @@
                 </tfoot>
             </table>
             <p>Thank you for your purchase!</p>
-            <button class="print-btn" onclick="window.print()">Print Invoice</button>
-            <button class="whatsapp-btn" onclick="sendWhatsApp()">Send via WhatsApp</button>
+            <button class="print-btn" onclick="printAndSendWhatsApp()">Print & Send via WhatsApp</button>
         </div>
     </div>
 
@@ -172,6 +171,17 @@
             });
 
             document.getElementById("grandTotal").innerText = total;
+        }
+
+        function printAndSendWhatsApp() {
+            window.print();
+            setTimeout(sendWhatsApp, 500);
+        }
+
+        function sendWhatsApp() {
+            let phone = document.getElementById("customerMobile").value;
+            let message = `Invoice for ${document.getElementById("cName").innerText}\nTotal: ₹${document.getElementById("grandTotal").innerText}`;
+            window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`);
         }
 
         document.addEventListener("DOMContentLoaded", populateProductDropdown);

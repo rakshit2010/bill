@@ -5,59 +5,176 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Generator</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .container { max-width: 400px; margin: auto; }
-        .invoice { display: none; border: 1px solid black; padding: 10px; margin-top: 20px; text-align: left; }
-        .print-btn { margin-top: 10px; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #f8f8f8; }
+        .container { max-width: 350px; margin: auto; background: white; padding: 15px; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 8px; text-align: left; }
+        select, input, button { padding: 6px; font-size: 14px; width: 100%; }
+        button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; margin-top: 5px; }
+        button:hover { background: #0056b3; }
+        .invoice { display: none; width: 240px; padding: 10px; margin: auto; background: white; font-size: 12px; border: 1px dashed black; }
+        .invoice-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
+        .invoice-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .invoice-table th, .invoice-table td { padding: 4px; text-align: left; border-bottom: 1px dashed black; }
+        .total-row { font-weight: bold; }
+        .print-btn, .whatsapp-btn { margin-top: 10px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            .invoice, .invoice * { visibility: visible; }
+            .invoice { position: absolute; left: 0; top: 0; width: 100%; height: auto; }
+            .print-btn, .whatsapp-btn { display: none; }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Simple Invoice</h2>
-        <form id="invoiceForm">
-            <label>Customer Name:</label><br>
-            <input type="text" id="customerName" required><br><br>
-            
-            <label>Item Name:</label><br>
-            <input type="text" id="itemName" required><br><br>
+        <h2>Invoice Generator</h2>
 
-            <label>Price:</label><br>
-            <input type="number" id="price" required><br><br>
+        <div class="form-group">
+            <label>Customer Name:</label>
+            <input type="text" id="customerName" required>
+        </div>
 
-            <label>Quantity:</label><br>
-            <input type="number" id="quantity" required><br><br>
+        <div class="form-group">
+            <label>Customer Mobile:</label>
+            <input type="text" id="customerMobile" required pattern="[0-9]{10}" maxlength="10" placeholder="Enter 10-digit mobile number">
+        </div>
 
-            <button type="button" onclick="generateInvoice()">Generate Invoice</button>
-        </form>
+        <h3>Items</h3>
+        <table id="itemsTable" class="invoice-table">
+            <tr>
+                <th>Item</th>
+                <th>₹</th>
+                <th>Qty</th>
+                <th>Action</th>
+            </tr>
+        </table>
+
+        <div class="form-group">
+            <label>Select Product:</label>
+            <select id="productSelect" onchange="updatePrice()">
+                <option value="" disabled selected>Select an item</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Price:</label>
+            <input type="number" id="price" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>Quantity:</label>
+            <input type="number" id="quantity" value="1">
+        </div>
+
+        <button type="button" onclick="addItem()">Add Item</button>
+        <button type="button" onclick="generateInvoice()">Generate Invoice</button>
 
         <div class="invoice" id="invoice">
-            <h3>Invoice</h3>
+            <div class="invoice-header">
+                <h2>Store Name</h2>
+                <p>Date: <span id="invoiceDate"></span></p>
+            </div>
             <p><strong>Customer:</strong> <span id="cName"></span></p>
-            <p><strong>Item:</strong> <span id="iName"></span></p>
-            <p><strong>Price:</strong> ₹<span id="iPrice"></span></p>
-            <p><strong>Quantity:</strong> <span id="iQuantity"></span></p>
-            <p><strong>Total:</strong> ₹<span id="iTotal"></span></p>
-            <button class="print-btn" onclick="window.print()">Print</button>
+            <p><strong>Mobile:</strong> <span id="cMobile"></span></p>
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>₹</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceItems"></tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3"><strong>Grand Total</strong></td>
+                        <td>₹<span id="grandTotal">0</span></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <p>Thank you for your purchase!</p>
+            <button class="print-btn" onclick="window.print()">Print Invoice</button>
+            <button class="whatsapp-btn" onclick="sendWhatsApp()">Send via WhatsApp</button>
         </div>
     </div>
 
     <script>
-        function generateInvoice() {
-            let name = document.getElementById("customerName").value;
-            let item = document.getElementById("itemName").value;
-            let price = document.getElementById("price").value;
-            let quantity = document.getElementById("quantity").value;
-            let total = price * quantity;
+        let items = [];
+        const productPrices = {
+            "Crop Top": 250,
+            "Crop Shirt": 250,
+            "Crop T-shirt": 200,
+            "Korean Top": 250,
+            "Turkish Shirt": 300,
+            "Imported Chiffon Top": 250,
+            "Cotton Top": 250,
+            "Cotton Shirt": 250,
+            "Korean Formal Trousers": 250,
+            "Jeans": 400,
+            "Plazo": 200,
+            "One-piece": 500
+        };
 
-            document.getElementById("cName").innerText = name;
-            document.getElementById("iName").innerText = item;
-            document.getElementById("iPrice").innerText = price;
-            document.getElementById("iQuantity").innerText = quantity;
-            document.getElementById("iTotal").innerText = total;
-
-            document.getElementById("invoice").style.display = "block";
+        function populateProductDropdown() {
+            let productSelect = document.getElementById("productSelect");
+            for (let product in productPrices) {
+                let option = document.createElement("option");
+                option.value = product;
+                option.textContent = `${product} - ₹${productPrices[product]}`;
+                productSelect.appendChild(option);
+            }
         }
+
+        function updatePrice() {
+            let itemName = document.getElementById("productSelect").value;
+            document.getElementById("price").value = productPrices[itemName];
+        }
+
+        function addItem() {
+            let itemName = document.getElementById("productSelect").value;
+            let price = productPrices[itemName];
+            let quantity = parseInt(document.getElementById("quantity").value);
+
+            if (!itemName || price <= 0 || quantity <= 0) {
+                alert("Please select a valid item and quantity!");
+                return;
+            }
+
+            items.push({ name: itemName, price, quantity });
+            updateItemsTable();
+        }
+
+        function updateItemsTable() {
+            let table = document.getElementById("itemsTable");
+            table.innerHTML = `<tr><th>Item</th><th>₹</th><th>Qty</th><th>Action</th></tr>`;
+            items.forEach((item, index) => {
+                table.innerHTML += `<tr><td>${item.name}</td><td>₹${item.price}</td><td>${item.quantity}</td><td><button onclick="removeItem(${index})">Remove</button></td></tr>`;
+            });
+        }
+
+        function generateInvoice() {
+            document.getElementById("invoice").style.display = "block";
+            document.getElementById("cName").innerText = document.getElementById("customerName").value;
+            document.getElementById("cMobile").innerText = document.getElementById("customerMobile").value;
+            document.getElementById("invoiceDate").innerText = new Date().toLocaleDateString();
+
+            let total = 0;
+            let invoiceTable = document.getElementById("invoiceItems");
+            invoiceTable.innerHTML = "";
+
+            items.forEach(item => {
+                let row = `<tr><td>${item.name}</td><td>₹${item.price}</td><td>${item.quantity}</td><td>₹${item.price * item.quantity}</td></tr>`;
+                invoiceTable.innerHTML += row;
+                total += item.price * item.quantity;
+            });
+
+            document.getElementById("grandTotal").innerText = total;
+        }
+
+        document.addEventListener("DOMContentLoaded", populateProductDropdown);
     </script>
 
 </body>

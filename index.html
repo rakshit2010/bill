@@ -187,9 +187,37 @@
         document.getElementById("grandTotal").innerText = total;
     }
 
+    
     function printInvoice() {
-        window.print();
+        let invoiceElement = document.getElementById("invoice").cloneNode(true);
+        invoiceElement.style.display = "block"; // Ensure it remains visible
+
+        let printWindow = window.open("", "", "width=250,height=600");
+        printWindow.document.open();
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Print Invoice</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; }
+                    .invoice { width: 240px; margin: auto; font-size: 12px; padding: 10px; border: 1px dashed black; }
+                    .invoice-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
+                    .invoice-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                    .invoice-table th, .invoice-table td { padding: 4px; text-align: left; border-bottom: 1px dashed black; }
+                    .total-row { font-weight: bold; }
+                </style>
+            </head>
+            <body>
+                ${invoiceElement.outerHTML}
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+        printWindow.close();
     }
+
+
 
     document.addEventListener("DOMContentLoaded", populateProductDropdown);
 </script>

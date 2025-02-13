@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-    <style>
+   <style>
     @media print {
         body * {
             visibility: hidden; /* Hide everything except invoice */
@@ -46,6 +46,16 @@
         .print-btn {
             display: none; /* Hide print button */
         }
+        .invoice-table {
+            width: 100%; /* Make table full width */
+            font-size: 24px; /* Increase table text size */
+            border-collapse: collapse;
+        }
+        .invoice-table th, .invoice-table td {
+            padding: 12px; /* Increase padding for better spacing */
+            border-bottom: 2px solid black; /* Make borders thicker */
+            text-align: left;
+        }
     }
 </style>
 
@@ -54,6 +64,7 @@
         window.print(); // Print only the invoice section using CSS
     }
 </script>
+
 
 
     <div class="container">

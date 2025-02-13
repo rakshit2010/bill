@@ -26,6 +26,35 @@
     </style>
 </head>
 <body>
+    <style>
+    @media print {
+        body * {
+            visibility: hidden; /* Hide everything except invoice */
+        }
+        #invoice, #invoice * {
+            visibility: visible;
+        }
+        #invoice {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 560px; /* Doubled size */
+            font-size: 24px; /* Larger text */
+            padding: 30px;
+            border: 2px dashed black;
+        }
+        .print-btn {
+            display: none; /* Hide print button */
+        }
+    }
+</style>
+
+<script>
+    function printInvoice() {
+        window.print(); // Print only the invoice section using CSS
+    }
+</script>
+
 
     <div class="container">
         <h2>Invoice Generator</h2>
@@ -189,30 +218,7 @@
 
     
    
-    function printInvoice() {
-        let invoiceElement = document.getElementById("invoice").cloneNode(true);
-        invoiceElement.style.display = "block"; // Ensure it remains visible
-
-        // Remove the "Print Bill" button from the printed receipt
-        let printButton = invoiceElement.querySelector(".print-btn");
-        if (printButton) {
-            printButton.remove();
-        }
-
-        let originalBody = document.body.innerHTML; // Store the original page content
-
-        document.body.innerHTML = `
-            <div class="invoice" style="width: 560px; font-size: 24px; padding: 30px; border: 2px dashed black;">
-                ${invoiceElement.innerHTML}
-            </div>
-        `; // Set only the invoice for printing
-
-        window.print(); // Trigger print
-
-        document.body.innerHTML = originalBody; // Restore the original page content
-        location.reload(); // Reload to reset the page
-    }
-
+   
 
 
 

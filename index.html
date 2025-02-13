@@ -188,7 +188,7 @@
     }
 
     
-    
+   
     function printInvoice() {
         let invoiceElement = document.getElementById("invoice").cloneNode(true);
         invoiceElement.style.display = "block"; // Ensure it remains visible
@@ -199,30 +199,21 @@
             printButton.remove();
         }
 
-        let printWindow = window.open("", "", "width=300,height=800");
-        printWindow.document.open();
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Print Invoice</title>
-                <style>
-                    body { font-family: Arial, sans-serif; text-align: center; }
-                    .invoice { width: 280px; margin: auto; font-size: 14px; padding: 15px; border: 1px dashed black; }
-                    .invoice-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
-                    .invoice-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-                    .invoice-table th, .invoice-table td { padding: 6px; text-align: left; border-bottom: 1px dashed black; }
-                    .total-row { font-weight: bold; }
-                </style>
-            </head>
-            <body>
-                ${invoiceElement.outerHTML}
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
-        printWindow.close();
+        let originalBody = document.body.innerHTML; // Store the original page content
+
+        document.body.innerHTML = `
+            <div class="invoice" style="width: 560px; font-size: 24px; padding: 30px; border: 2px dashed black;">
+                ${invoiceElement.innerHTML}
+            </div>
+        `; // Set only the invoice for printing
+
+        window.print(); // Trigger print
+
+        document.body.innerHTML = originalBody; // Restore the original page content
+        location.reload(); // Reload to reset the page
     }
+
+
 
 
 

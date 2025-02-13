@@ -188,11 +188,18 @@
     }
 
     
+    
     function printInvoice() {
         let invoiceElement = document.getElementById("invoice").cloneNode(true);
         invoiceElement.style.display = "block"; // Ensure it remains visible
 
-        let printWindow = window.open("", "", "width=250,height=600");
+        // Remove the "Print Bill" button from the printed receipt
+        let printButton = invoiceElement.querySelector(".print-btn");
+        if (printButton) {
+            printButton.remove();
+        }
+
+        let printWindow = window.open("", "", "width=300,height=800");
         printWindow.document.open();
         printWindow.document.write(`
             <html>
@@ -200,10 +207,10 @@
                 <title>Print Invoice</title>
                 <style>
                     body { font-family: Arial, sans-serif; text-align: center; }
-                    .invoice { width: 240px; margin: auto; font-size: 12px; padding: 10px; border: 1px dashed black; }
+                    .invoice { width: 280px; margin: auto; font-size: 14px; padding: 15px; border: 1px dashed black; }
                     .invoice-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
-                    .invoice-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-                    .invoice-table th, .invoice-table td { padding: 4px; text-align: left; border-bottom: 1px dashed black; }
+                    .invoice-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+                    .invoice-table th, .invoice-table td { padding: 6px; text-align: left; border-bottom: 1px dashed black; }
                     .total-row { font-weight: bold; }
                 </style>
             </head>
@@ -216,6 +223,7 @@
         printWindow.print();
         printWindow.close();
     }
+
 
 
 

@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Generator</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #f8f8f8; }
-        .container { max-width: 350px; margin: auto; background: white; padding: 15px; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        body { font-family: Arial, sans-serif; text-align: center; background: #f8f8f8; padding: 10px; }
+        .container { max-width: 350px; margin: auto; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
         .form-group { display: flex; flex-direction: column; margin-bottom: 8px; text-align: left; }
         select, input, button { padding: 6px; font-size: 14px; width: 100%; }
-        button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; margin-top: 5px; }
+        button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; margin-top: 5px; padding: 8px; }
         button:hover { background: #0056b3; }
         .invoice { display: none; width: 240px; padding: 10px; margin: auto; background: white; font-size: 12px; border: 1px dashed black; }
         .invoice-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px; }
         .invoice-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .invoice-table th, .invoice-table td { padding: 4px; text-align: left; border-bottom: 1px dashed black; }
         .total-row { font-weight: bold; }
-        .print-btn { margin-top: 10px; }
 
         @media print {
             body * { visibility: hidden; }
@@ -73,7 +72,10 @@
 
         <div class="invoice" id="invoice">
             <div class="invoice-header">
-                <h2>Store Name</h2>
+                <h2>Jalaram Clothes</h2>
+                <p>G-21 Sumeru City Mall</p>
+                <p>Near Sudama Chowk</p>
+                <p>8320827878</p>
                 <p>Date: <span id="invoiceDate"></span></p>
             </div>
             <p><strong>Customer:</strong> <span id="cName"></span></p>
@@ -96,7 +98,7 @@
                 </tfoot>
             </table>
             <p>Thank you for your purchase!</p>
-            <button class="print-btn" onclick="printAndSendPDF()">Print & Send via WhatsApp</button>
+            <button class="print-btn" onclick="printInvoice()">Print Bill</button>
         </div>
     </div>
 
@@ -173,36 +175,9 @@
             document.getElementById("grandTotal").innerText = total;
         }
 
-        function printAndSendWhatsApp() {
+        function printInvoice() {
             window.print();
-            setTimeout(sendWhatsApp, 500);
         }
-
-        function sendWhatsApp() {
-            let phone = document.getElementById("customerMobile").value;
-            let message = `Invoice for ${document.getElementById("cName").innerText}\nTotal: ₹${document.getElementById("grandTotal").innerText}`;
-            window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`);
-        }
-       
-async function printAndSendPDF() {
-    let invoiceHtml = document.getElementById("invoice").innerHTML;
-    let phoneNumber = document.getElementById("customerMobile").value;
-
-    let response = await fetch("/generate-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invoiceHtml, phoneNumber }),
-    });
-
-    let result = await response.json();
-    if (result.success) {
-        alert("Invoice sent via WhatsApp!");
-    } else {
-        alert("Error sending invoice.");
-    }
-}
-
-
 
         document.addEventListener("DOMContentLoaded", populateProductDropdown);
     </script>

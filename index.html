@@ -41,8 +41,7 @@
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mega-sdk@1.0.0/mega.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/webdav-client@1.0.0-beta.10/dist/webdav-client.bundle.js"></script>
+    <script src="https://www.dropbox.com/static/api/2/dropins.js"></script>
 
 
 
@@ -151,14 +150,17 @@
             "Combo 300/-1 3 pieces": 700,
             "Combo 400/-1 3 pieces": 1000
         };
-        const MEGA_USERNAME = 'laganpart1@gmail.com';
-        const MEGA_PASSWORD = 'Jalaram@123';
-
-        // Initialize WebDAV client
-        const client = new WebDAV.Client('https://webdav.mega.nz/', {
-            username: MEGA_USERNAME,
-            password: MEGA_PASSWORD
+        const button = Dropbox.createChooseButton({
+            success: function(files) {
+                console.log("Files:", files);
+                // After file is selected, generate PDF and upload
+                generatePDF(files);
+            },
+            linkType: "direct",
+            multiselect: false,
+            extensions: ['.pdf'],
         });
+        document.getElementById("dropbox-button").appendChild(button);
         
 
         function populateProductDropdown() {
@@ -258,36 +260,43 @@
 
         doc.save(pdfFileName);
         const pdfBlob = doc.output('blob');
-        uploadToMega(pdfBlob);
+        uploadToDropbox(pdfBlob);
 
 
         
         }
-        function uploadToMega(pdfBlob) {
-            const fileName = `Invoice_${billNo}`;
-            const filePath = `/storage/emulated/O/Android/data/com.android.chrome/files/Download/${fileName}`;
-
-            client.putFileContents(filePath, pdfBlob).then(function() {
-                console.log('File uploaded successfully!');
-                // Generate shareable link
-                const fileLink = `https://mega.nz/file/${filePath}`;
-                console.log('File shareable link:', fileLink);
-                
-                // Send via WhatsApp
-                sendViaWhatsApp(fileLink);
-            }).catch(function(error) {
-                console.error('Error uploading file:', error);
-            });
+        function uploadToDropbox(file) {
+            const accessToken = 'sl.u.AFjh5U-ryukINR12T0XKVFq0cYw8aMTyZwnDIfvzJoAGnG3l5DS3CIIgM23dLq7zxT5azXhtkUiurlpeHF1LN-QLn9XwPRabR4pcU0LTaUy4wxdAIxqY6co80Qw7GL0MqXvBZNrBw72P8Y4Q2PebcMtsIz8GZtBuz8vg7a0sy2hKsA2NVbtoE_TCPDP7jgNKUk6Jzjks6m54XQTHZmkpVZpLYr4TjIdNzvXPHtd-_9DQ5JZazWSu7P5ponJ_OT6wPyODZ7e2cHBUu6IFHuLXrmZS6UFgAQ7dTWqpDfAgHse7yBq7ycel4N33fm6KjU1ltcd3GtlQn1xe_RoMTWLZ25dQOieuOqxOwD2ua1XBJ9agrnN7X1bcVVXP3WcgJmRFFZKG8BoQYk2dYZ286YMbcVS_KVZFuboaN7yDPkwA7yQQhZzUEeSZJhoUUpt0Ztwzhqfl01IGuOcYnEVu3SFClgc6vUzSi5VSqre5MUzZI3zBhejWcoIApTOKMj2-WgB7iIbVAcEYUbr7C7F94768pa59fKz1yA2r0PlyNnbTl7kV3n5ucs2a82qLRgERDLHCzGl5HbNd2EiPJz7uHwoSQC9y5c7LWFaDiHnpaw04JoNj_1sEJgwOxUtriTeyUe_m0ARPNxU2irCa91IxmW9niZY0eu7NHDcj2wi8XdGXS5P9XlgQQR8vvW0-9UFPtobxyzgHoPiga3731m5G_oqUKoywJLdVmQOiYcr1YRW8mXnrD9XILtja7ZZ_op107-fCSOricFz5Qps0xsIpSLhCj06KeYRTVXmw1a2O8zRTxIG_3KPOg0f7jVrFK1LriztCKNe-i0tdGXEVdwRtg3-jbFBSGAxcnvYYjNKRREET8WrrjT_gGxqSzwT4YMYji0ayAaXwhr3KLhevsPosIlr19vJSUKB5RyyJY1qol66RXEP91aRYAEaJw1BoLjt4pgbFWKyiFCEW_MqOrRnpXXM3Nu2yF8-zd-vl9LvBdVLFC3V6sO9ARDcJvAHFWLOy849ryVaZ3iMvL32z0ACwwYV9k0nCzISnQ5d8HvZYCDmMfkr42wlrYeUsULZOtoKuSnRMbXMhoYeiYq3UZ92GUlr1rQcQSfbjzzmlrOJiRF0jdkWLJgTRPaTq7Ad03yZlwwVfET70InQfBmtFj05ipsiuCzNDOwfOKNTr7B6_ap2m_936PbWaHCp3bAL3rPvwzNaUpvS97DeqSJw6QQHQR1n6boHfm3e94Hl8cD5NN8xmMZU7CC386wPbf0GMiHMqPdjH8V_i-ZMbxEQrgt-cqNgHdSy3ogBd4bZdVn7IJxZ279fDYXw3H5FoXTaJTb46NIBCRLTrVdVvP145E8elrjxpyXbhy4RZ8kj9vH4v-54pXmvrs_1VCYUc5qP8wDDYtS42srM3kBLQmhmkX_l8wztdX3m2mreccZ6F_LFI8zGLo2uBNA';
+            const dbx = new Dropbox.Dropbox({ accessToken });
+            const pat =`/storage/emulated/O/Android/data/com.android.chrome/files/Download/Invoice_${billNo}.pdf`;
+            dbx.filesUpload({ path: pat , contents: file })
+                .then(function(response) {
+                    console.log('File uploaded', response);
+                    shareLink(response.id);
+                })
+                .catch(function(error) {
+                    console.error('Error uploading file', error);
+                });
         }
 
-        // Send the shareable link via WhatsApp
-        function sendViaWhatsApp(fileLink) {
-            const customerMobile = document.getElementById('cMobile').innerText.trim(); // Get customer mobile
-            const message = `Hello, your invoice is ready. Please find your bill here: ${fileLink}`;
-            const whatsappURL = `https://wa.me/${customerMobile}?text=${encodeURIComponent(message)}`;
-            window.open(whatsappURL, '_blank');
-        }
+        function shareLink(fileId) {
+            const dbx = new Dropbox.Dropbox({ accessToken: 'sl.u.AFjh5U-ryukINR12T0XKVFq0cYw8aMTyZwnDIfvzJoAGnG3l5DS3CIIgM23dLq7zxT5azXhtkUiurlpeHF1LN-QLn9XwPRabR4pcU0LTaUy4wxdAIxqY6co80Qw7GL0MqXvBZNrBw72P8Y4Q2PebcMtsIz8GZtBuz8vg7a0sy2hKsA2NVbtoE_TCPDP7jgNKUk6Jzjks6m54XQTHZmkpVZpLYr4TjIdNzvXPHtd-_9DQ5JZazWSu7P5ponJ_OT6wPyODZ7e2cHBUu6IFHuLXrmZS6UFgAQ7dTWqpDfAgHse7yBq7ycel4N33fm6KjU1ltcd3GtlQn1xe_RoMTWLZ25dQOieuOqxOwD2ua1XBJ9agrnN7X1bcVVXP3WcgJmRFFZKG8BoQYk2dYZ286YMbcVS_KVZFuboaN7yDPkwA7yQQhZzUEeSZJhoUUpt0Ztwzhqfl01IGuOcYnEVu3SFClgc6vUzSi5VSqre5MUzZI3zBhejWcoIApTOKMj2-WgB7iIbVAcEYUbr7C7F94768pa59fKz1yA2r0PlyNnbTl7kV3n5ucs2a82qLRgERDLHCzGl5HbNd2EiPJz7uHwoSQC9y5c7LWFaDiHnpaw04JoNj_1sEJgwOxUtriTeyUe_m0ARPNxU2irCa91IxmW9niZY0eu7NHDcj2wi8XdGXS5P9XlgQQR8vvW0-9UFPtobxyzgHoPiga3731m5G_oqUKoywJLdVmQOiYcr1YRW8mXnrD9XILtja7ZZ_op107-fCSOricFz5Qps0xsIpSLhCj06KeYRTVXmw1a2O8zRTxIG_3KPOg0f7jVrFK1LriztCKNe-i0tdGXEVdwRtg3-jbFBSGAxcnvYYjNKRREET8WrrjT_gGxqSzwT4YMYji0ayAaXwhr3KLhevsPosIlr19vJSUKB5RyyJY1qol66RXEP91aRYAEaJw1BoLjt4pgbFWKyiFCEW_MqOrRnpXXM3Nu2yF8-zd-vl9LvBdVLFC3V6sO9ARDcJvAHFWLOy849ryVaZ3iMvL32z0ACwwYV9k0nCzISnQ5d8HvZYCDmMfkr42wlrYeUsULZOtoKuSnRMbXMhoYeiYq3UZ92GUlr1rQcQSfbjzzmlrOJiRF0jdkWLJgTRPaTq7Ad03yZlwwVfET70InQfBmtFj05ipsiuCzNDOwfOKNTr7B6_ap2m_936PbWaHCp3bAL3rPvwzNaUpvS97DeqSJw6QQHQR1n6boHfm3e94Hl8cD5NN8xmMZU7CC386wPbf0GMiHMqPdjH8V_i-ZMbxEQrgt-cqNgHdSy3ogBd4bZdVn7IJxZ279fDYXw3H5FoXTaJTb46NIBCRLTrVdVvP145E8elrjxpyXbhy4RZ8kj9vH4v-54pXmvrs_1VCYUc5qP8wDDYtS42srM3kBLQmhmkX_l8wztdX3m2mreccZ6F_LFI8zGLo2uBNA' });
+            const pat =`/storage/emulated/O/Android/data/com.android.chrome/files/Download/Invoice_${billNo}.pdf`;
+            dbx.sharingCreateSharedLink({ path: pat })
+                .then(function(response) {
+                    const fileLink = response.url;
+                    console.log('Shareable link:', fileLink);
+                    const customerMobile = document.getElementById("cMobile").innerText; 
+                    const message = `Your invoice is ready! Please find it here: ${fileLink}`;
+                    const whatsappURL = `https://wa.me/${customerMobile}?text=${encodeURIComponent(message)}`;
 
+                    // Open WhatsApp with the message
+                    window.open(whatsappURL, '_blank');
+                })
+                .catch(function(error) {
+                    console.error('Error generating share link', error);
+                });
+        }
 
 
         function printInvoice() {

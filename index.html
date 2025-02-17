@@ -234,14 +234,24 @@
         document.getElementById("billNumber").innerText = billNo; // Update UI with new bill number
             }
         function saveInvoiceAsPDF() {
-        const { jsPDF } = window.jspdf;
-        let doc = new jsPDF();
-        let invoiceContent = document.getElementById("invoice").innerText;
-        let billNo = document.getElementById("billNumber").innerText;
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
 
-        doc.text(invoiceContent, 10, 10);
-        doc.save(`Invoice_${billNo}.pdf`);
-    }
+    // Capture the HTML content of the invoice
+    let invoiceElement = document.getElementById("invoice");
+
+    // Add HTML content to the PDF while maintaining styles
+    doc.html(invoiceElement, {
+        callback: function (doc) {
+            let billNo = document.getElementById("billNumber").innerText;
+            doc.save(`Invoice_${billNo}.pdf`);
+        },
+        margin: [10, 10, 10, 10], // Adjust margins to fit the page properly
+        x: 10,
+        y: 10
+    });
+}
+
 
 
         function printInvoice() {

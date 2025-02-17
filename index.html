@@ -235,23 +235,35 @@
         document.getElementById("billNumber").innerText = billNo; // Update UI with new bill number
             }
         function saveInvoiceAsPDF() {
-    const { jsPDF } = window.jspdf;
-    let doc = new jsPDF();
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF({ format: "a6" }); // Small bill format (same as print)
 
-    // Capture the HTML content of the invoice
-    let invoiceElement = document.getElementById("invoice");
+        let invoiceElement = document.getElementById("invoice");
+        doc.html(invoiceElement, {
+            callback: function (doc) {
+                let billNo = document.getElementById("billNumber").innerText;
+                let pdfFileName = `Invoice_${billNo}.pdf`;
 
-    // Use jsPDF's html method to add HTML content while maintaining styles
-    doc.html(invoiceElement, {
-        callback: function (doc) {
-            let billNo = document.getElementById("billNumber").innerText;
-            doc.save(`Invoice_${billNo}.pdf`); // Save the PDF with the bill number
-        },
-        margin: [10, 10, 10, 10], // Adjust margins to fit the content within the page
-        x: 10,  // Horizontal position
-        y: 10   // Vertical position
-    });
-}
+                doc.save(pdfFileName); // Save PDF locally
+
+                setTimeout(() => {
+                    sendWhatsAppMessage(pdfFileName);
+                }, 1000);
+            }
+        });
+        }
+            function sendWhatsAppMessage(pdfFileName) {
+        let customerMobile = document.getElementById("cMobile").innerText.trim();
+        if (!customerMobile) {
+            alert("Customer mobile number is missing!");
+            return;
+        }
+
+        let message = `Hello, your invoice is ready. Please find your bill attached.\n\nInvoice: ${pdfFileName}`;
+        let whatsappURL = `https://wa.me/${customerMobile}?text=${encodeURIComponent(message)}`;
+
+        window.open(whatsappURL, "_blank");
+            }
 
 
 

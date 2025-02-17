@@ -222,6 +222,12 @@
 
             document.getElementById("grandTotal").innerText = total;
         }
+            function updateBillNumber() {
+        let billNo = localStorage.getItem("billNumber"); // Get last saved bill number
+        billNo = parseInt(billNo) + 1; // Increment bill number
+        localStorage.setItem("billNumber", billNo); // Save updated bill number
+        document.getElementById("billNumber").innerText = billNo; // Update UI with new bill number
+            }
 
         function printInvoice() {
             window.print();

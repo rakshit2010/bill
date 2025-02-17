@@ -236,21 +236,19 @@
             }
         function saveInvoiceAsPDF() {
         const { jsPDF } = window.jspdf;
-        let doc = new jsPDF({ format: "a6" }); // Small bill format (same as print)
+        let doc = new jsPDF({ format: "a6" });
 
-        let invoiceElement = document.getElementById("invoice");
-        doc.html(invoiceElement, {
-            callback: function (doc) {
-                let billNo = document.getElementById("billNumber").innerText;
-                let pdfFileName = `Invoice_${billNo}.pdf`;
+        let invoiceContent = document.getElementById("invoice").innerText;
+        doc.text(invoiceContent, 10, 10);
 
-                doc.save(pdfFileName); // Save PDF locally
+        let billNo = document.getElementById("billNumber").innerText;
+        let pdfFileName = `Invoice_${billNo}.pdf`;
 
-                setTimeout(() => {
-                    sendWhatsAppMessage(pdfFileName);
-                }, 1000);
-            }
-        });
+        doc.save(pdfFileName);
+
+        setTimeout(() => {
+            sendWhatsAppMessage(pdfFileName);
+        }, 2000);
         }
             function sendWhatsAppMessage(pdfFileName) {
         let customerMobile = document.getElementById("cMobile").innerText.trim();

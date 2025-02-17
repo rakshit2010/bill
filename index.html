@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <title>Invoice Generator</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f8f8f8; padding: 10px; }
@@ -229,10 +231,21 @@
         localStorage.setItem("billNumber", billNo); // Save updated bill number
         document.getElementById("billNumber").innerText = billNo; // Update UI with new bill number
             }
+        function saveInvoiceAsPDF(billNo) {
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF();
+
+        let invoiceContent = document.getElementById("invoice").innerText; // Get invoice text content
+        doc.text(invoiceContent, 10, 10); // Add text to PDF
+
+        let fileName = `Invoice_${billNo}.pdf`; // Unique file name
+        doc.save(fileName); // Save the PDF file
+            }
 
         function printInvoice() {
             window.print();
             updateBillNumber() ;
+            saveInvoiceAsPDF(${billNo});
             
         }
 

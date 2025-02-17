@@ -16,6 +16,22 @@
         .invoice-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .invoice-table th, .invoice-table td { padding: 4px; text-align: left; border-bottom: 1px dashed black; }
         .total-row { font-weight: bold; }
+        #billNumberContainer {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    @media print {
+        #billNumberContainer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px; /* Bigger size for print */
+        }
+    }
 
         @media print {
             body * { visibility: hidden; }
@@ -72,12 +88,16 @@
 
         <div class="invoice" id="invoice">
             <div class="invoice-header">
-                <p><strong>Bill No:</strong> <span id="billNumber"></span></p>
+                
 
                 <h2>Jalaram Clothes</h2>
                 <p>G-21 Sumeru City Mall,Near Sudama Chowk Opp. Krishna Township, Mota Varachha,Surat <br>
                     8320827878 <br>
                 Date: <span id="invoiceDate"></span></p>
+                <div id="billNumberContainer">
+    <p><strong>Bill No:</strong> <span id="billNumber"></span></p>
+</div>
+
             </div>
             <p><strong>Customer:</strong> <span id="cName"></span></p>
             <p><strong>Mobile:</strong> <span id="cMobile"></span></p>

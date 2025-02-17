@@ -208,7 +208,8 @@
             document.getElementById("invoice").style.display = "block";
             document.getElementById("cName").innerText = document.getElementById("customerName").value;
             document.getElementById("cMobile").innerText = document.getElementById("customerMobile").value;
-            document.getElementById("invoiceDate").innerText = new Date().toLocaleDateString();
+            document.getElementById("invoiceDate").innerText = new Date().toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit', year: 'numeric' });
+
 
             let total = 0;
             let invoiceTable = document.getElementById("invoiceItems");

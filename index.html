@@ -233,11 +233,21 @@
         localStorage.setItem("billNumber", billNo); // Save updated bill number
         document.getElementById("billNumber").innerText = billNo; // Update UI with new bill number
             }
-        
+        function saveInvoiceAsPDF() {
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF();
+        let invoiceContent = document.getElementById("invoice").innerText;
+        let billNo = document.getElementById("billNumber").innerText;
+
+        doc.text(invoiceContent, 10, 10);
+        doc.save(`Invoice_${billNo}.pdf`);
+    }
+
 
         function printInvoice() {
             window.print();
             updateBillNumber() ;
+            saveInvoiceAsPDF();
             
             
         }

@@ -153,13 +153,25 @@
             updateItemsTable();
         }
 
-        function updateItemsTable() {
-            let table = document.getElementById("itemsTable");
-            table.innerHTML = `<tr><th>Item</th><th>₹</th><th>Qty</th><th>Action</th></tr>`;
-            items.forEach((item, index) => {
-                table.innerHTML += `<tr><td>${item.name}</td><td>₹${item.price}</td><td>${item.quantity}</td><td><button onclick="removeItem(${index})">Remove</button></td></tr>`;
-            });
-        }
+        function removeItem(index) {
+        items.splice(index, 1); // Remove the selected item from the array
+        updateItemsTable(); // Refresh the table
+    }
+
+    function updateItemsTable() {
+        let table = document.getElementById("itemsTable");
+        table.innerHTML = `<tr><th>Item</th><th>₹</th><th>Qty</th><th>Action</th></tr>`;
+        items.forEach((item, index) => {
+            table.innerHTML += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>₹${item.price}</td>
+                    <td>${item.quantity}</td>
+                    <td><button onclick="removeItem(${index})">❌</button></td>
+                </tr>
+            `;
+        });
+    }
 
         function generateInvoice() {
             document.getElementById("invoice").style.display = "block";

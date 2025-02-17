@@ -41,6 +41,8 @@
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mega-sdk@1.0.0/mega.js"></script>
+
 
 
 </head>
@@ -148,6 +150,20 @@
             "Combo 300/-1 3 pieces": 700,
             "Combo 400/-1 3 pieces": 1000
         };
+        const megaEmail = 'laganpart1@gmail.com'; // Your MEGA email
+        const megaPassword = 'Jalaram@123'; // Your MEGA password
+        function initMegaClient() {
+            return new Promise((resolve, reject) => {
+                const client = new MEGA.Client();
+                client.login(megaEmail, megaPassword, function (error) {
+                    if (error) {
+                        reject('Login failed: ' + error);
+                    } else {
+                        resolve(client);
+                    }
+                });
+            });
+        }
 
         function populateProductDropdown() {
             let productSelect = document.getElementById("productSelect");
@@ -245,22 +261,40 @@
         let pdfFileName = `Invoice_${billNo}.pdf`;
 
         doc.save(pdfFileName);
+        const pdfBlob = doc.output('blob');
+        uploadToMega(pdfBlob);
 
-        setTimeout(() => {
-            sendWhatsAppMessage(pdfFileName);
-        }, 2000);
+
+        
         }
-            function sendWhatsAppMessage(pdfFileName) {
-        let customerMobile = document.getElementById("cMobile").innerText.trim();
-        if (!customerMobile) {
-            alert("Customer mobile number is missing!");
-            return;
+        async function uploadToMega(pdfBlob) {
+            try {
+                const client = await initMegaClient();
+                let billNo = document.getElementById("billNumber").innerText;
+                let pdfFileName = `Invoice_${billNo}.pdf`;
+                client.upload(pdfBlob, pdfFileName , function (error, file) {
+                    if (error) {
+                        console.error('Upload failed: ', error);
+                    } else {
+                        // File uploaded successfully
+                        console.log('File uploaded:', file);
+                        // Generate shareable link
+                        const link = file.link();
+                        console.log('Shareable Link: ', link);
+
+                        // Send the link via WhatsApp
+                        sendViaWhatsApp(link);
+                    }
+                });
+            } catch (error) {
+                console.error('Error uploading to MEGA:', error);
+            }
         }
-
-        let message = `Hello, your invoice is ready. Please find your bill attached.\n\nInvoice: ${pdfFileName}`;
-        let whatsappURL = `https://wa.me/${customerMobile}?text=${encodeURIComponent(message)}`;
-
-        window.open(whatsappURL, "_blank");
+            function sendViaWhatsApp(fileLink) {
+            const customerMobile = document.getElementById('cMobile').innerText.trim(); // Get customer mobile
+            const message = `Hello, your invoice is ready. Please find your bill here: ${fileLink}`;
+            const whatsappURL = `https://wa.me/${customerMobile}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappURL, '_blank');
             }
 
 

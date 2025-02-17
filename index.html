@@ -159,18 +159,7 @@
             username: MEGA_USERNAME,
             password: MEGA_PASSWORD
         });
-        function initMegaClient() {
-            return new Promise((resolve, reject) => {
-                const client = new MEGA.Client();
-                client.login(megaEmail, megaPassword, function (error) {
-                    if (error) {
-                        reject('Login failed: ' + error);
-                    } else {
-                        resolve(client);
-                    }
-                });
-            });
-        }
+        
 
         function populateProductDropdown() {
             let productSelect = document.getElementById("productSelect");

@@ -213,7 +213,7 @@
     }
         function generateBillNumber() {
         let billNo = localStorage.getItem("billNumber"); // Get last saved bill number
-        if (!billNo || billNo==NaN) {
+        if (!billNo || billNo == NaN) {
             billNo = 1; // Start from 1 if no bill exists
         } 
          // Save updated bill number
@@ -221,8 +221,7 @@
     }
 
     // Run function when the page loads
-    window.onload = generateBillNumber();
-
+    
         function generateInvoice() {
             document.getElementById("invoice").style.display = "block";
             document.getElementById("cName").innerText = document.getElementById("customerName").value;
@@ -239,6 +238,8 @@
                 invoiceTable.innerHTML += row;
                 total += item.price * item.quantity;
             });
+            generateBillNumber();
+
 
             document.getElementById("grandTotal").innerText = total;
         }

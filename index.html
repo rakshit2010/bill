@@ -332,6 +332,8 @@ function uploadToDropbox(file) {
 }
 function shareInvoiceAsText() {
     let invoiceText = "----- Invoice -----\n";
+    invoiceText += `Jalaram Clothes \n`;
+    invoiceText += `G-21 Sumeru City Mall,Near Sudama \n Chowk Opp. Krishna Township, Mota \n Varachha,Surat \n 8320827878  \n`;
     invoiceText += `Bill No: ${document.getElementById("billNumber").innerText}\n`;
     invoiceText += `Date: ${new Date().toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit', year: 'numeric' })}\n`;
     invoiceText += `Customer: ${document.getElementById("customerName").value}\n`;

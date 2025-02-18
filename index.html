@@ -212,13 +212,17 @@
         });
     }
         function generateBillNumber() {
-        let billNo = localStorage.getItem("billNumber"); // Get last saved bill number
-        if (!billNo || billNo == NaN) {
-            billNo = 1; // Start from 1 if no bill exists
-        } 
-         // Save updated bill number
-        document.getElementById("billNumber").innerText = billNo; // Display bill number
+    let billNo = localStorage.getItem("billNumber"); // Get last saved bill number
+
+    if (!billNo || isNaN(billNo)) {
+        billNo = 1; // Start from 1 if no bill exists
+    } else {
+        billNo = parseInt(billNo); // Ensure it is a number
     }
+
+    document.getElementById("billNumber").innerText = billNo; // Display bill number
+}
+
 
     // Run function when the page loads
     
@@ -242,17 +246,21 @@
 
 
             document.getElementById("grandTotal").innerText = total;
-            updateBillNumber();
+            
         }
             function updateBillNumber() {
-        let billNo = localStorage.getItem("billNumber"); // Get last saved bill number
-        if (!billNo || billNo == NaN) {
-            billNo = 1; // Start from 1 if no bill exists
-        } else{
-                billNo = parseInt(billNo) + 1;} // Increment bill number
-        localStorage.setItem("billNumber", billNo); // Save updated bill number
-        document.getElementById("billNumber").innerText = billNo; // Update UI with new bill number
-            }
+    let billNo = localStorage.getItem("billNumber"); // Get last saved bill number
+
+    if (!billNo || isNaN(billNo)) {
+        billNo = 1; // Start from 1 if no bill exists
+    } else {
+        billNo = parseInt(billNo) + 1; // Increment bill number
+    }
+
+    localStorage.setItem("billNumber", billNo); // Save updated bill number
+    document.getElementById("billNumber").innerText = billNo; // Update UI with new bill number
+}
+
         function saveInvoiceAsPDF() {
         const { jsPDF } = window.jspdf;
         let doc = new jsPDF({ format: "a6" });
@@ -270,6 +278,10 @@
 
         
         }
+        window.onload = function () {
+    generateBillNumber();
+};
+
         function uploadToDropbox(file) {
             const accessToken = 'sl.u.AFjh5U-ryukINR12T0XKVFq0cYw8aMTyZwnDIfvzJoAGnG3l5DS3CIIgM23dLq7zxT5azXhtkUiurlpeHF1LN-QLn9XwPRabR4pcU0LTaUy4wxdAIxqY6co80Qw7GL0MqXvBZNrBw72P8Y4Q2PebcMtsIz8GZtBuz8vg7a0sy2hKsA2NVbtoE_TCPDP7jgNKUk6Jzjks6m54XQTHZmkpVZpLYr4TjIdNzvXPHtd-_9DQ5JZazWSu7P5ponJ_OT6wPyODZ7e2cHBUu6IFHuLXrmZS6UFgAQ7dTWqpDfAgHse7yBq7ycel4N33fm6KjU1ltcd3GtlQn1xe_RoMTWLZ25dQOieuOqxOwD2ua1XBJ9agrnN7X1bcVVXP3WcgJmRFFZKG8BoQYk2dYZ286YMbcVS_KVZFuboaN7yDPkwA7yQQhZzUEeSZJhoUUpt0Ztwzhqfl01IGuOcYnEVu3SFClgc6vUzSi5VSqre5MUzZI3zBhejWcoIApTOKMj2-WgB7iIbVAcEYUbr7C7F94768pa59fKz1yA2r0PlyNnbTl7kV3n5ucs2a82qLRgERDLHCzGl5HbNd2EiPJz7uHwoSQC9y5c7LWFaDiHnpaw04JoNj_1sEJgwOxUtriTeyUe_m0ARPNxU2irCa91IxmW9niZY0eu7NHDcj2wi8XdGXS5P9XlgQQR8vvW0-9UFPtobxyzgHoPiga3731m5G_oqUKoywJLdVmQOiYcr1YRW8mXnrD9XILtja7ZZ_op107-fCSOricFz5Qps0xsIpSLhCj06KeYRTVXmw1a2O8zRTxIG_3KPOg0f7jVrFK1LriztCKNe-i0tdGXEVdwRtg3-jbFBSGAxcnvYYjNKRREET8WrrjT_gGxqSzwT4YMYji0ayAaXwhr3KLhevsPosIlr19vJSUKB5RyyJY1qol66RXEP91aRYAEaJw1BoLjt4pgbFWKyiFCEW_MqOrRnpXXM3Nu2yF8-zd-vl9LvBdVLFC3V6sO9ARDcJvAHFWLOy849ryVaZ3iMvL32z0ACwwYV9k0nCzISnQ5d8HvZYCDmMfkr42wlrYeUsULZOtoKuSnRMbXMhoYeiYq3UZ92GUlr1rQcQSfbjzzmlrOJiRF0jdkWLJgTRPaTq7Ad03yZlwwVfET70InQfBmtFj05ipsiuCzNDOwfOKNTr7B6_ap2m_936PbWaHCp3bAL3rPvwzNaUpvS97DeqSJw6QQHQR1n6boHfm3e94Hl8cD5NN8xmMZU7CC386wPbf0GMiHMqPdjH8V_i-ZMbxEQrgt-cqNgHdSy3ogBd4bZdVn7IJxZ279fDYXw3H5FoXTaJTb46NIBCRLTrVdVvP145E8elrjxpyXbhy4RZ8kj9vH4v-54pXmvrs_1VCYUc5qP8wDDYtS42srM3kBLQmhmkX_l8wztdX3m2mreccZ6F_LFI8zGLo2uBNA';
             const dbx = new Dropbox.Dropbox({ accessToken });

@@ -320,7 +320,7 @@ function uploadToDropbox(file) {
     dbx.filesUpload({
         path: filePath,
         contents: file,
-        mode: 'overwrite',
+        mode: 'add',
     })
     .then(function (response) {
         console.log('File uploaded successfully:', response);

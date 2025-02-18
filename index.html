@@ -35,13 +35,15 @@
         @media print {
             body * { visibility: hidden; }
             .invoice, .invoice * { visibility: visible; }
-            .invoice { position: absolute; left: 0; top: 0; right: 0; width: 100%; height: 100%; }
+            .invoice { position: absolute; left: 0; top: 0;  width: 96%;  }
             .print-btn { display: none; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://www.dropbox.com/static/api/2/dropins.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropbox.js/10.34.0/Dropbox-sdk.min.js"></script>
+
 
 
 
@@ -150,17 +152,7 @@
             "Combo 300/-1 3 pieces": 700,
             "Combo 400/-1 3 pieces": 1000
         };
-        const button = Dropbox.createChooseButton({
-            success: function(files) {
-                console.log("Files:", files);
-                // After file is selected, generate PDF and upload
-                generatePDF(files);
-            },
-            linkType: "direct",
-            multiselect: false,
-            extensions: ['.pdf'],
-        });
-        document.getElementById("dropbox-button").appendChild(button);
+        
         
 
         function populateProductDropdown() {
@@ -261,65 +253,116 @@
     document.getElementById("billNumber").innerText = billNo; // Update UI with new bill number
 }
 
-        function saveInvoiceAsPDF() {
-        const { jsPDF } = window.jspdf;
-        let doc = new jsPDF({ format: "a6" });
+function saveInvoiceAsPDF() {
+    const { jsPDF } = window.jspdf;
 
-        let invoiceContent = document.getElementById("invoice").innerText;
-        doc.text(invoiceContent, 10, 10);
+    // Capture the invoice div as an image using html2canvas
+    html2canvas(document.getElementById("invoice"), {
+        scale: 2, // Increase scale for better quality
+        logging: true, // Enable logging for debugging
+        useCORS: true, // Enable CORS for external resources
+    }).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png"); // Convert canvas to image data
+        const pdf = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "a4", // Use A6 format for the invoice
+        });
 
-        let billNo = document.getElementById("billNumber").innerText;
-        let pdfFileName = `Invoice_${billNo}.pdf`;
+        const imgWidth = pdf.internal.pageSize.getWidth(); // Get PDF page width
+        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Calculate image height to maintain aspect ratio
 
-        doc.save(pdfFileName);
-        const pdfBlob = doc.output('blob');
-        uploadToDropbox(pdfBlob);
+        const pageHeight = pdf.internal.pageSize.getHeight(); // Get PDF page height
+        let position = 0; // Track the position of the image
 
+        // Add the image to the PDF, splitting it into multiple pages if necessary
+        while (position < imgHeight) {
+            pdf.addImage(imgData, "PNG", 0, -position, imgWidth, imgHeight);
+            position += pageHeight;
 
-        
+            if (position < imgHeight) {
+                pdf.addPage(); // Add a new page if there's more content
+            }
         }
+
+        // Save the PDF with a filename
+        const billNo = document.getElementById("billNumber").innerText;
+        const pdfFileName = `Invoice_${billNo}.pdf`;
+        pdf.save(pdfFileName);
+
+        // Upload the PDF to Dropbox
+        const pdfBlob = pdf.output("blob");
+         uploadToDropbox(pdfBlob);
+    });
+}
         window.onload = function () {
     generateBillNumber();
 };
 
-        function uploadToDropbox(file) {
-            const accessToken = 'sl.u.AFjh5U-ryukINR12T0XKVFq0cYw8aMTyZwnDIfvzJoAGnG3l5DS3CIIgM23dLq7zxT5azXhtkUiurlpeHF1LN-QLn9XwPRabR4pcU0LTaUy4wxdAIxqY6co80Qw7GL0MqXvBZNrBw72P8Y4Q2PebcMtsIz8GZtBuz8vg7a0sy2hKsA2NVbtoE_TCPDP7jgNKUk6Jzjks6m54XQTHZmkpVZpLYr4TjIdNzvXPHtd-_9DQ5JZazWSu7P5ponJ_OT6wPyODZ7e2cHBUu6IFHuLXrmZS6UFgAQ7dTWqpDfAgHse7yBq7ycel4N33fm6KjU1ltcd3GtlQn1xe_RoMTWLZ25dQOieuOqxOwD2ua1XBJ9agrnN7X1bcVVXP3WcgJmRFFZKG8BoQYk2dYZ286YMbcVS_KVZFuboaN7yDPkwA7yQQhZzUEeSZJhoUUpt0Ztwzhqfl01IGuOcYnEVu3SFClgc6vUzSi5VSqre5MUzZI3zBhejWcoIApTOKMj2-WgB7iIbVAcEYUbr7C7F94768pa59fKz1yA2r0PlyNnbTl7kV3n5ucs2a82qLRgERDLHCzGl5HbNd2EiPJz7uHwoSQC9y5c7LWFaDiHnpaw04JoNj_1sEJgwOxUtriTeyUe_m0ARPNxU2irCa91IxmW9niZY0eu7NHDcj2wi8XdGXS5P9XlgQQR8vvW0-9UFPtobxyzgHoPiga3731m5G_oqUKoywJLdVmQOiYcr1YRW8mXnrD9XILtja7ZZ_op107-fCSOricFz5Qps0xsIpSLhCj06KeYRTVXmw1a2O8zRTxIG_3KPOg0f7jVrFK1LriztCKNe-i0tdGXEVdwRtg3-jbFBSGAxcnvYYjNKRREET8WrrjT_gGxqSzwT4YMYji0ayAaXwhr3KLhevsPosIlr19vJSUKB5RyyJY1qol66RXEP91aRYAEaJw1BoLjt4pgbFWKyiFCEW_MqOrRnpXXM3Nu2yF8-zd-vl9LvBdVLFC3V6sO9ARDcJvAHFWLOy849ryVaZ3iMvL32z0ACwwYV9k0nCzISnQ5d8HvZYCDmMfkr42wlrYeUsULZOtoKuSnRMbXMhoYeiYq3UZ92GUlr1rQcQSfbjzzmlrOJiRF0jdkWLJgTRPaTq7Ad03yZlwwVfET70InQfBmtFj05ipsiuCzNDOwfOKNTr7B6_ap2m_936PbWaHCp3bAL3rPvwzNaUpvS97DeqSJw6QQHQR1n6boHfm3e94Hl8cD5NN8xmMZU7CC386wPbf0GMiHMqPdjH8V_i-ZMbxEQrgt-cqNgHdSy3ogBd4bZdVn7IJxZ279fDYXw3H5FoXTaJTb46NIBCRLTrVdVvP145E8elrjxpyXbhy4RZ8kj9vH4v-54pXmvrs_1VCYUc5qP8wDDYtS42srM3kBLQmhmkX_l8wztdX3m2mreccZ6F_LFI8zGLo2uBNA';
-            const dbx = new Dropbox.Dropbox({ accessToken });
-            const pat =`/storage/emulated/O/Android/data/com.android.chrome/files/Download/Invoice_${billNo}.pdf`;
-            dbx.filesUpload({ path: pat , contents: file })
-                .then(function(response) {
-                    console.log('File uploaded', response);
-                    shareLink(response.id);
-                })
-                .catch(function(error) {
-                    console.error('Error uploading file', error);
-                });
-        }
+        
+        
 
-        function shareLink(fileId) {
-            const dbx = new Dropbox.Dropbox({ accessToken: 'sl.u.AFjh5U-ryukINR12T0XKVFq0cYw8aMTyZwnDIfvzJoAGnG3l5DS3CIIgM23dLq7zxT5azXhtkUiurlpeHF1LN-QLn9XwPRabR4pcU0LTaUy4wxdAIxqY6co80Qw7GL0MqXvBZNrBw72P8Y4Q2PebcMtsIz8GZtBuz8vg7a0sy2hKsA2NVbtoE_TCPDP7jgNKUk6Jzjks6m54XQTHZmkpVZpLYr4TjIdNzvXPHtd-_9DQ5JZazWSu7P5ponJ_OT6wPyODZ7e2cHBUu6IFHuLXrmZS6UFgAQ7dTWqpDfAgHse7yBq7ycel4N33fm6KjU1ltcd3GtlQn1xe_RoMTWLZ25dQOieuOqxOwD2ua1XBJ9agrnN7X1bcVVXP3WcgJmRFFZKG8BoQYk2dYZ286YMbcVS_KVZFuboaN7yDPkwA7yQQhZzUEeSZJhoUUpt0Ztwzhqfl01IGuOcYnEVu3SFClgc6vUzSi5VSqre5MUzZI3zBhejWcoIApTOKMj2-WgB7iIbVAcEYUbr7C7F94768pa59fKz1yA2r0PlyNnbTl7kV3n5ucs2a82qLRgERDLHCzGl5HbNd2EiPJz7uHwoSQC9y5c7LWFaDiHnpaw04JoNj_1sEJgwOxUtriTeyUe_m0ARPNxU2irCa91IxmW9niZY0eu7NHDcj2wi8XdGXS5P9XlgQQR8vvW0-9UFPtobxyzgHoPiga3731m5G_oqUKoywJLdVmQOiYcr1YRW8mXnrD9XILtja7ZZ_op107-fCSOricFz5Qps0xsIpSLhCj06KeYRTVXmw1a2O8zRTxIG_3KPOg0f7jVrFK1LriztCKNe-i0tdGXEVdwRtg3-jbFBSGAxcnvYYjNKRREET8WrrjT_gGxqSzwT4YMYji0ayAaXwhr3KLhevsPosIlr19vJSUKB5RyyJY1qol66RXEP91aRYAEaJw1BoLjt4pgbFWKyiFCEW_MqOrRnpXXM3Nu2yF8-zd-vl9LvBdVLFC3V6sO9ARDcJvAHFWLOy849ryVaZ3iMvL32z0ACwwYV9k0nCzISnQ5d8HvZYCDmMfkr42wlrYeUsULZOtoKuSnRMbXMhoYeiYq3UZ92GUlr1rQcQSfbjzzmlrOJiRF0jdkWLJgTRPaTq7Ad03yZlwwVfET70InQfBmtFj05ipsiuCzNDOwfOKNTr7B6_ap2m_936PbWaHCp3bAL3rPvwzNaUpvS97DeqSJw6QQHQR1n6boHfm3e94Hl8cD5NN8xmMZU7CC386wPbf0GMiHMqPdjH8V_i-ZMbxEQrgt-cqNgHdSy3ogBd4bZdVn7IJxZ279fDYXw3H5FoXTaJTb46NIBCRLTrVdVvP145E8elrjxpyXbhy4RZ8kj9vH4v-54pXmvrs_1VCYUc5qP8wDDYtS42srM3kBLQmhmkX_l8wztdX3m2mreccZ6F_LFI8zGLo2uBNA' });
-            const pat =`/storage/emulated/O/Android/data/com.android.chrome/files/Download/Invoice_${billNo}.pdf`;
-            dbx.sharingCreateSharedLink({ path: pat })
-                .then(function(response) {
-                    const fileLink = response.url;
-                    console.log('Shareable link:', fileLink);
-                    const customerMobile = document.getElementById("cMobile").innerText; 
-                    const message = `Your invoice is ready! Please find it here: ${fileLink}`;
-                    const whatsappURL = `https://wa.me/${customerMobile}?text=${encodeURIComponent(message)}`;
+function uploadToDropbox(file) {
+    const accessToken = 'sl.u.AFjvmq2QBS9xMXeMGZ6jCmYEq_36jpHRNQlyXrscaQYyVN0MbWv-habe1iFX5b_39ezN0cKWDmZtWOdur8L-NnHVv9bM3-aYCrFMqy3nWEUVr_-KBE-KgPL_nlWTd7Y7C1PVBRxidv9y0CI5U0w7mVDPKyz2HabCBFdwp8p8bPp1vmIZ9Va6OND0uq9dZTcKDXROF7GOuUYhrFFjvUc6Sw4bqzxZktZnXPvvk-dQKqb8UgQ8qQedbXOXzeKre5g3dNiK9uDiJmcUqxhlBohFgaIo9jwNj1_FQs4tBzHbRG-U6gTo16cfouAAZD-us_waNa4_0UzluaXPmqxbtLTyHJzxzqx-jlWLJHTopEN8Pg9gidFZQsjkmC8tkU3qMhMF_H8NqIjcXy8NcEp6OH1QM8-vVYEeJKeDwUikmDncfq84q118f6ZbSaUpqz4qdxjw_ah_OrVfRH5GKdVdO-pshPqUnc6utihYQfM0MuMcbJHJSAY-els-TM4UQgrwMa-j_NiiAZZ3GjPBOQLO2Vb9jBPGLo11q1v_J8yvpFnZWPopu6wkHmPmCuSCk09GDn5Y5FZG2ov-0dOOXE49_7WlQ6wJpKhkq1IbzIVQ4BAsy63i5TG2gROiIoMHs7tclfHINgrRaM_7WqtfhSp8FHuT_tvKnZ3E_OCDO2jgyM23_U_-CoY5Db1Vh1OKrymR034UpgVztY-RkzwRBzxFfUwZVG6Wj6-irEdeZHuxx1cAD0S3QSmZ4-CzlnAhU08kQ-JcozchguXXPXiV6cnBskia74qmJ8GNB_92j-CIHU2TnPnIW1DMxlNOfBsw7RLIg243qrkFnNOeq-VWPooT0AO_obfi3IAemwXgn13FFLo4rrv1LT1EWdYo7GJwo4Szm96WyxMyC1K_vhHnEmE5weffHAMaL8vLaO0_JimJOM-wawm7Fh_0vbAkRpEu62vxqtgehn72OJ4ChUq7k4jaboxD3MoHCA1vfb0Th3kf87EYjU67lRFkrGocrOijCAkKZAEpcxbdpIG2J-_68O4qZW8t1t_hFiji61xLfAcHlBB8sTxXpn5ZbyH5uxUmeT_nSNAfFNK5n7ISebCZs8q-vMokkG8PpkAdBbae3pBCsExts7FyxKJa-ki2ltOZVDZR6SrLPZqx_3r-sC5uW7Ldy-mkUez-WkyExSyAfCeE9J1fZanjvUUfMaNdgspj4UuNIoa3hUeqmFBwgRFY_u2EJYOv2Ue23ctYoiYVJkNvGphuBwyfuLywNhtd1Cq5PAa5ZWjxh2Fm29ooDjbaC-hDomhQRDyTTO_L8OGjXr3ZRFdisI3ZDgiZeb1FB77osCffugm6lAqhYgWeGV8KQxfOkOSFoF7WTgce-ay30Lxm9tTcBeiFDMATgnN-hKqNQB3LHztgUElazT2IxZfXxHB4vjWvYS-BtBJb9DYUByYcibwzIcPWMw'; // Replace with your valid token
+    const dbx = new Dropbox.Dropbox({ accessToken });
 
-                    // Open WhatsApp with the message
-                    window.open(whatsappURL, '_blank');
-                })
-                .catch(function(error) {
-                    console.error('Error generating share link', error);
-                });
-        }
+    const billNo = document.getElementById("billNumber").innerText;
+    const sanitizedBillNo = billNo.replace(/[^a-zA-Z0-9]/g, '_'); // Sanitize bill number
+    const filePath = `/Invoices/Invoice_${sanitizedBillNo}.pdf`;
+
+    console.log("Uploading file to Dropbox:", {
+        path: filePath,
+        contents: file,
+        mode: 'overwrite',
+    });
+
+    // Step 1: Upload the file to Dropbox
+    dbx.filesUpload({
+        path: filePath,
+        contents: file,
+        mode: 'overwrite',
+    })
+    .then(function (response) {
+        console.log('File uploaded successfully:', response);
+
+        
+    })
+    
+    
+}
+function shareInvoiceAsText() {
+    let invoiceText = "----- Invoice -----\n";
+    invoiceText += `Bill No: ${document.getElementById("billNumber").innerText}\n`;
+    invoiceText += `Date: ${new Date().toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit', year: 'numeric' })}\n`;
+    invoiceText += `Customer: ${document.getElementById("customerName").value}\n`;
+    invoiceText += `Mobile: ${document.getElementById("customerMobile").value}\n\n`;
+
+    let total = 0;
+    items.forEach(item => {
+        invoiceText += `${item.name} - ₹${item.price} x ${item.quantity} = ₹${item.price * item.quantity}\n`;
+        total += item.price * item.quantity;
+    });
+
+    invoiceText += `\nGrand Total: ₹${total}\n`;
+    invoiceText += "NO RETURN NO EXCHANGE\nThank you for your purchase!\nVisit Again";
+
+    const customerMobile = document.getElementById("customerMobile").value;
+    const message = encodeURIComponent(invoiceText);  // Encode message for URL
+    const whatsappURL = `https://wa.me/${customerMobile}?text=${message}`;
+
+    window.open(whatsappURL, '_blank');  // Open the WhatsApp link to send the message
+}
+
+
+
 
 
         function printInvoice() {
-            window.print();
             updateBillNumber() ;
+            window.print();
+            
             saveInvoiceAsPDF();
+            shareInvoiceAsText();
             
             
         }
@@ -329,4 +372,5 @@
 
 </body>
 </html>
+
 

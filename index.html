@@ -313,7 +313,7 @@ function uploadToDropbox(file) {
     console.log("Uploading file to Dropbox:", {
         path: filePath,
         contents: file,
-        mode: 'overwrite',
+        mode: 'add',
     });
 
     // Step 1: Upload the file to Dropbox

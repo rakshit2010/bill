@@ -213,7 +213,7 @@
     }
         function generateBillNumber() {
         let billNo = localStorage.getItem("billNumber"); // Get last saved bill number
-        if (!billNo) {
+        if (!billNo || billNo==NaN) {
             billNo = 1; // Start from 1 if no bill exists
         } 
          // Save updated bill number

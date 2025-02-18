@@ -242,6 +242,7 @@
 
 
             document.getElementById("grandTotal").innerText = total;
+            updateBillNumber();
         }
             function updateBillNumber() {
         let billNo = localStorage.getItem("billNumber"); // Get last saved bill number
